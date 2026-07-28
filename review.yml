@@ -1,0 +1,530 @@
+aid: transat
+name: Transat
+review:
+  question: >-
+    Does Transat A.T. Inc. / Air Transat publish a real, reachable API surface, and what
+    would it cost a partner to leave it?
+  answer: true
+  date: '2026-07-28'
+  reviewer: API Evangelist
+  scope: >-
+    Bootstrap identity + honest public-API capture + spec harvest for the Canadian
+    travel and aviation tier. All findings below were fetched live on 2026-07-28;
+    every URL probed is recorded with its HTTP status.
+
+findings:
+  summary: |
+    Transat A.T. Inc. (TSX: TRZ) is a Montreal-based vertically integrated leisure
+    travel group: Air Transat (IATA carrier code TS) plus tour-operating and retail
+    agency brands. It has no developer portal in the ordinary sense — no
+    developer./developers./docs. host resolves, /developers and /api-docs 404, and
+    there is no OpenAPI, WSDL, Swagger UI, llms.txt or .well-known descriptor
+    anywhere on either primary domain.
+
+    It does, however, publish something rarer than most carriers: a public NDC
+    connectivity page at https://www.airtransat.com/en-CA/air-transat-ndc (HTTP 200,
+    EN and FR) that links, unauthenticated, to a 46-page PDF labelled "Air Transat API
+    specifications". That PDF is NOT an IATA NDC schema. It is the Radixx ConnectPoint
+    API, "Flight Booking - Detailed View", version 2.2.4, updated May 2023 — a SOAP 1.1
+    / .NET WCF contract using http://tempuri.org/ and
+    http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.* namespaces. Radixx is
+    the Sabre-owned passenger service system; the document explicitly routes shopping
+    either through "Radixx Local System Shopping - Internal" or the "Sabre Shopping
+    Cache - External", and states that "Shopping Externally or Internally is setup by
+    Transat in an Origin and Destination table. Partners do not have the ability to
+    choose the flight pricing source."
+
+    So the marketing frame is the IATA standard and the published contract is a vendor
+    PSS proprietary SOAP API. Both are true at once, and that gap is the whole finding.
+  operationsDocumented:
+    - RetrieveFastFareSearch
+    - RetrieveFareQuote / RetrieveFareQuoteShop
+    - RetrieveSecurityToken
+    - LoginTravelAgent
+    - RetrieveAgencyCommission
+    - SummaryPNR
+    - CreatePNR (CommitSummary)
+    - CreatePNR (SaveReservation)
+    - RetrievePNR
+    - ConvertCurrencies
+    - ProcessPNRPayment
+    - Notification
+  productFamilySegmentation:
+    shopping: RetrieveFastFareSearch, RetrieveFareQuoteShop (internal Radixx cache or external Sabre shopping cache)
+    offersAndPricing: RetrieveFareQuote, ConvertCurrencies
+    agencyIdentity: LoginTravelAgent, RetrieveAgencyCommission
+    bookingAndOrder: SummaryPNR, CreatePNR (CommitSummary), CreatePNR (SaveReservation), RetrievePNR
+    payment: ProcessPNRPayment
+    servicing: RetrievePNR (session must be re-established via RetrieveSecurityToken after SaveReservation)
+    events: Notification
+    loyalty: not documented in the published specification
+    contentAndImagery: not documented in the published specification
+  transports:
+    - protocol: SOAP
+      version: '1.1'
+      envelope: http://schemas.xmlsoap.org/soap/envelope/
+      serviceNamespace: http://tempuri.org/
+      dataContractNamespaces:
+        - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Request
+        - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Pricing.Request.FastFareSearch
+        - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Pricing.Request.Enums
+        - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Pricing.Response
+        - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Reservation.Request
+        - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Fulfillment.Request
+        - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Notification.Request
+        - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Exceptions
+      documented: true
+      baseURLPublished: false
+      note: >-
+        No endpoint host, WSDL location or sandbox URL appears anywhere in the 46-page
+        specification. The service address is supplied privately to each partner.
+    - protocol: REST
+      documented: false
+      note: >-
+        Undocumented first-party JSON/XML hosts are visible in the airtransat.com page
+        configuration (api.transat.com/{fares,products,client,flight,shopping,edocs,
+        notifications}, apis.airtransat.com). These are internal site APIs with no
+        published contract and are NOT listed as APIs in apis.yml. See probes below.
+  authentication:
+    scheme: Vendor credential exchange, not OAuth
+    flow: >-
+      RetrieveSecurityToken with AccessibleCarrierCode "TS" plus a Radixx LogonID and
+      Password returns a SecurityGUID that scopes the whole booking flow. LoginTravelAgent
+      then presents SecurityGUID + AccessibleCarrierCode + IATANumber + agency UserName +
+      Password. The document states: "A pre-defined Travel Agency will be configured and
+      provided to each OTA Partner."
+    scopes: none published
+    sessionNote: >-
+      "After calling SavePNR at the end of the main booking flow, the session is closed.
+      RetrieveSecurityToken must be called again, for example, when retrieving PNR."
+
+switchingCost:
+  interfaceShape:
+    value: standard-plus-proprietary
+    standardsNamed:
+      - name: IATA New Distribution Capability (NDC)
+        status: >-
+          Asserted, not evidenced. The airtransat.com/en-CA/air-transat-ndc page (HTTP 200)
+          describes NDC as "an initiative by IATA ... Based on XML language standards" and
+          says Air Transat delivers NDC content through Accelya Farelogix and six named
+          aggregators. No NDC schema version (17.2 / 18.1 / 19.2 / 21.3), no IATA NDC
+          certification level, and no ARM Index entry is claimed anywhere on the site.
+          Air Transat does not appear on Duffel's published list of NDC-certified airlines
+          (https://duffel.com/ndc/airlines-and-ndc, HTTP 200, checked 2026-07-28 — string
+          "Transat" not present).
+      - name: IATA Resolution 850m (Agency Debit Memos)
+        status: >-
+          Explicitly invoked in the CRS Booking and Ticketing Procedures Policy as the
+          legal basis for ADMs against agents.
+      - name: IATA Standard Traffic Document 649 / BSP Link
+        status: >-
+          "Audits and checks are performed on TS 649 documents." Refund requests must be
+          "submitted in BSP Link to Air Transat within 12 months of the issuing date."
+      - name: Radixx ConnectPoint API v2.2.4 (Sabre-owned PSS), SOAP 1.1 / .NET WCF
+        status: >-
+          This is the ONLY downloadable technical contract Transat publishes. It is fully
+          proprietary — tempuri.org service namespace, Radixx.ConnectPoint.* data contracts,
+          Radixx-specific FareID / TripID / SecurityGUID semantics, and a Radixx-specific
+          internal-vs-external pricing flow that changes which identifier you must pass.
+    verdict: >-
+      Transat sells the standard and ships the proprietary. A partner integrating the
+      documented direct connect is writing against Radixx ConnectPoint, not against an
+      IATA NDC message set, so the integration is not portable to another carrier that
+      also claims NDC. Only partners who go through an aggregator (Travelfusion, Clarity
+      TTS, Farenexus, Onefly, and "available soon" Mystifly and Duffel) get a genuinely
+      reusable interface — and that interface belongs to the aggregator, not to Transat.
+
+  secondSource:
+    value: alternatives-with-migration
+    alternativesConsidered:
+      - >-
+        Air Transat's own seat inventory has no second source. No other supplier can sell
+        a TS-marketed seat; that content is single-origin by definition.
+      - >-
+        There are, however, six published routes to that same content, listed by Transat
+        itself on the NDC page: Travelfusion
+        (https://corporate.travelfusion.com/products-services/tf-new-distribution-capability),
+        Clarity TTS (https://www.claritytts.com/en), Farenexus (https://www.farenexus.com/),
+        Onefly (https://www.onefly.fr/), Mystifly (https://mystifly.com/, marked
+        "available soon"), and Duffel (https://duffel.com/, marked "available soon").
+      - >-
+        Plus two agent portals — Sprk (Accelya) and Transat Agent Direct — and the legacy
+        GDS/CRS EDIFACT channel, which the NDC page says carries a surcharge that NDC
+        bookings do not.
+      - >-
+        Rejected as a second source: third-party flight-data vendors (Aviation Edge,
+        AirLabs) resell Air Transat schedule and status data but cannot shop, price,
+        book, pay or service. They are not substitutable for the distribution API.
+    verdict: >-
+      The content is single-source; the route to it is not. Moving from the Radixx direct
+      connect to an aggregator, or between aggregators, is a full re-integration project
+      against a different message set, but it is possible and Transat publishes the menu.
+
+  exitPath:
+    value: export-on-request
+    operationCited: >-
+      No bulk export, dump, data-portability or reporting operation exists in the
+      published API. The only retrieval primitive is RetrievePNR, which returns one
+      record locator at a time and requires a fresh RetrieveSecurityToken per session.
+    consumerDataPortability: >-
+      The Air Transat privacy policy
+      (https://www.airtransat.com/en-CA/legal-notice/privacy-policy, HTTP 200) grants
+      access and correction rights generally, and portability only conditionally:
+      "if you reside in a member state of the EEA, you may exercise your rights to erase
+      your personal information, or to restrict or object to, on legitimate grounds, the
+      processing and portability of your personal information in accordance with EU
+      General Data Protection Regulation no. 2016/679". It adds: "A small fee may be
+      charged, upon notification from us, to cover the administrative costs of processing
+      such requests." Requests go to a human — an electronic form or privacy@transat.com,
+      Data Privacy Officer, 300 Leo-Pariseau Suite 600, Montreal.
+    verdict: >-
+      Manual, fee-bearing, per-subject, and geographically conditional. There is no
+      machine path out for a partner's booking corpus.
+
+  identifierPortability:
+    portable:
+      - IATA airline designator TS (AccessibleCarrierCode, mandatory on every operation)
+      - IATA 3-letter airport codes (worked examples YUL, CDG)
+      - IATA agency numbers (IATANumber, IataNumberOfRequestor, IATANum)
+      - PNR ConfirmationNumber / record locator (RetrievePNR, SummaryPNR)
+      - ISO currency codes (CurrencyCode, e.g. CAD)
+      - KnownTravelerNumber and RedressNumber (US government traveller identifiers)
+      - IATA Standard Traffic Document 649 numbers and BSP Link settlement references
+    nonPortable:
+      - Radixx SecurityGUID session token
+      - Radixx FareID and, for externally priced itineraries, TripID passed as FareInformationID
+      - Radixx internal-vs-external pricing flag (IsExternalPriced) and the Sabre shopping cache identifiers behind it
+      - Transat-assigned agency UserName / Password pairs
+      - ExternalBookingID
+    verdict: >-
+      The traveller-facing and settlement-facing keys are industry standard and travel
+      fine. The commercial keys — the ones that determine what a partner is allowed to
+      sell and at what price — are Radixx-internal and do not.
+
+  contractualLockIn:
+    published: true
+    source: https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy
+    verbatim:
+      - >-
+        "A Travel Agent shall not, without prior written consent from Air Transat, share,
+        redistribute, display or advertise any of Air Transat's content to a 3rd party
+        agent, including but not limited to, any GDS, Travel Agent, both online or not,
+        metasearch engine or any other website/entity where airfare may be distributed."
+      - >-
+        "Travel Agents must book and ticket within the same CRS. Travel Agents may not
+        duplicate segments by moving segments between CRS and may not create active or
+        passive duplicate bookings, including any combination of bookings that will not be
+        flown."
+      - >-
+        "Passive segments are not permitted unless approved in writing by Air Transat.
+        Travel agents who issue tickets on behalf of sub-agents must use the original live
+        CRS booking."
+      - >-
+        "Travel Agents shall not hold inventory for potential future sales. Title and full
+        name of each passenger is required at time of booking. Name changes are not
+        permitted."
+      - >-
+        "In accordance with IATA resolution 850m, Agency Debit Memos (ADM) are a legitimate
+        accounting tool for use by Air Transat ... Air Transat reserves the right to cancel
+        any Booking or Ticketing which contravenes the foregoing and issue an ADM for any
+        costs associated with such violation."
+      - >-
+        "Travel Agents may not issue Miscellaneous Charge Orders (MCOs) through the Airlines
+        reporting Corporation (ARC). Any request must be addressed to Air Transat by the
+        Travel Agent at the following address: airtransat-revenus@transat.com."
+      - >-
+        "Any request for reimbursement of a ticket booked through CRS must be submitted in
+        BSP Link to Air Transat within 12 months of the issuing date of the ticket."
+    siteTermsVerbatim:
+      source: https://www.airtransat.com/en-CA/legal-notice/terms-of-use-of-the-air-transat-sites
+      quotes:
+        - >-
+          "TTC grants you a non-exclusive, non-transferable license to use and display the
+          Sites and their Content ... solely for personal and non-commercial use."
+        - >-
+          "The use of software, applications, computer programs, automated scripts, macros,
+          spiders or other 'screen scraping' software, robots, 'bot' or any other technical
+          means or device to copy, extract, aggregate, store, distribute or manipulate the
+          Content on the Sites in order to engage in data mining or processing, 'screen
+          scraping' or in order to reproduce and/or display the Content on the Sites on any
+          other website or online service without TTC's prior written approval is prohibited."
+        - >-
+          "TTC reserves the right to terminate the Terms of Use and/or your right to use
+          these Sites, at any time, without cause and without prior notice, at its sole
+          discretion."
+      note: >-
+        The identical clauses appear at https://www.transat.com/en-CA/website-terms-and-conditions.
+    notPublished:
+      - Minimum term or notice period for the NDC / direct-connect partner agreement
+      - Full-content or exclusivity commitments
+      - Per-segment or per-transaction fees for the API (the EDIFACT surcharge is asserted on the NDC page but not quantified)
+      - Revocation and data-retention terms on partner account closure
+      - Any SLA, rate limit or deprecation policy
+    verdict: >-
+      What is published is one-directional: it constrains what an agent may do with Air
+      Transat content, and gives Air Transat a unilateral right to charge back, cancel and
+      terminate. Nothing published constrains Air Transat, and no commercial term of the
+      partner agreement is disclosed. Do not infer any that are not listed here.
+
+  accessGate:
+    value: commercial-agreement
+    whatADeveloperMustDo: >-
+      Contact commercial.ndc@transat.com (or an Air Transat commercial representative) and
+      enter a partner agreement. Transat then configures a pre-defined travel agency in
+      Radixx and issues (a) a Radixx LoginID/Password for RetrieveSecurityToken, (b) an
+      IATA number that must be "Active in RADIXX", and (c) an agency UserName/Password for
+      LoginTravelAgent. No self-serve signup, no key issuance page, no sandbox, no trial
+      exists. The specification PDF itself is the only thing available without asking.
+    agentPortalGate: >-
+      Transat Agent Direct (https://www.transatagentdirect.com/, HTTP 200, redirects to
+      /Pages/Login.aspx) authenticates on "Email or agency code" + password. Unregistered
+      agencies must telephone 514-987-1717 ext. 7505 for verification, then submit a manual
+      agency-registration form (/Pages/AgentAgencyDetails.aspx?target=CreateAgency,
+      HTTP 200) and wait for an acknowledgment. That is application-approval, not self-serve.
+    gated: true
+
+  distributionModel:
+    value: ndc-direct
+    ndcPosture: >-
+      Publishes an NDC programme with a public connectivity page but claims no IATA
+      certification level. Technology partner named as Accelya Farelogix. Direct API
+      integration is offered "for agencies or partners with technical resources to directly
+      integrate our API" with "full access to all NDC features"; aggregator access is
+      offered via Travelfusion, Clarity TTS, Farenexus and Onefly, with Mystifly and Duffel
+      "available soon"; portal access is offered via Sprk and Transat Agent Direct. On GDS
+      surcharging the page states verbatim: "Cost optimisation: no surcharge on bookings
+      made via NDC, unlike the surcharge applied to EDIFACT bookings" and "Financial
+      incentives for bookings made through NDC channels."
+    legacyChannel: >-
+      GDS/CRS EDIFACT remains live and is governed by the CRS Booking and Ticketing
+      Procedures Policy, with ADM enforcement under IATA Resolution 850m and refunds through
+      BSP Link. Codeshare and interline flows are documented in the API spec (RetrievePNR
+      codeshare, interline and AMCI examples), and Air Transat also runs a Porter Airlines
+      partnership and a Dohop-powered "connectair" self-connect product.
+    verdict: >-
+      Supply-side. Transat owns the inventory and is actively repricing the channel mix to
+      push partners off EDIFACT and onto its own NDC/direct-connect rails — which is exactly
+      the switching-cost move NDC was created to enable, executed in the airline's favour.
+
+  costToLeave: >-
+    A partner on the Radixx ConnectPoint direct connect who wants out must: rewrite every
+    call against a different message set (there is no NDC-schema portability to reuse);
+    abandon Radixx FareID / TripID / SecurityGUID handling and the internal-vs-external
+    pricing branch that Transat controls unilaterally; re-onboard through an aggregator or
+    the GDS and accept the EDIFACT surcharge Transat has priced against; extract historical
+    bookings one PNR at a time via RetrievePNR because no bulk export exists; and file a
+    manual, possibly fee-bearing privacy request for any personal data. What survives the
+    move is only the IATA layer — carrier code TS, airport codes, agency IATA numbers, PNR
+    locators, 649 documents and BSP references. Everything commercial has to be rebuilt.
+
+probes:
+  date: '2026-07-28'
+  method: curl with a desktop browser User-Agent, following redirects
+  results:
+    - url: https://www.transat.com
+      status: 200
+      note: Imperva Incapsula bot-mitigation interstitial on direct curl; renders normally via browser fetch.
+    - url: https://transat.com
+      status: 200
+    - url: https://www.airtransat.com
+      status: 200
+    - url: https://www.airtransat.com/en-CA/air-transat-ndc
+      status: 200
+      note: Public NDC connectivity page. Primary finding.
+    - url: https://www.airtransat.com/fr-CA/air-transat-ndc
+      status: 200
+    - url: https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+      status: 200
+      contentType: application/pdf
+      bytes: 1004540
+      pages: 46
+      note: >-
+        "Air Transat API specifications" — Radixx ConnectPoint API, Flight Booking Detailed
+        View, v2.2.4, updated May 2023. Publicly downloadable, no authentication.
+    - url: https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy
+      status: 200
+    - url: https://www.airtransat.com/en-CA/legal-notice/terms-of-use-of-the-air-transat-sites
+      status: 200
+    - url: https://www.airtransat.com/en-CA/legal-notice/privacy-policy
+      status: 200
+    - url: https://www.transat.com/en-CA/website-terms-and-conditions
+      status: 200
+    - url: https://www.transatagentdirect.com
+      status: 200
+      note: Redirects to /Pages/Login.aspx. Partner login, not a developer portal.
+    - url: https://www.transatagentdirect.com/Pages/AgentAgencyDetails.aspx?target=CreateAgency
+      status: 200
+      note: Manual agency registration form gated by a telephone verification step.
+    - url: https://www.airtransat.com/robots.txt
+      status: 200
+    - url: https://www.transat.com/robots.txt
+      status: 200
+    - url: https://www.airtransat.com/sitemaps
+      status: 200
+      note: Sitemap index; the en-CA sitemap (801 URLs) contains no developer, API or spec page.
+    - url: https://www.transat.com/sitemaps
+      status: 200
+      note: Sitemap index references https://www.transat.com/api/{locale}/sitemap/{hotels,itineraries} — a site-rendering endpoint, not a product API.
+    - url: https://www.transat.com/api/en-CA/sitemap/hotels?mainPage=true&subPages=false&alternates=true&imageCount=10
+      status: 200
+      contentType: text/xml
+      note: Returns a sitemap XML document. Internal, undocumented. Not listed as an API.
+    - url: https://www.transat.com/api
+      status: 200
+      contentType: application/json
+      body: '"26.14.1.1"'
+      note: Build-version string. Internal, undocumented. Not listed as an API.
+    - url: https://api.transat.com
+      status: 404
+      note: Host resolves. Referenced in airtransat.com page config as the base for /fares, /products, /client, /flight, /shopping, /edocs, /notifications. No published contract; all probed subpaths 404 unauthenticated.
+    - url: https://api.airtransat.com
+      status: 403
+      note: Imperva Incapsula block page.
+    - url: https://apis.airtransat.com
+      status: 404
+      note: Host resolves. Referenced in page config as "umbrellaTS". No published contract.
+    - url: https://connectair.airtransat.com
+      status: 429
+      note: Dohop-powered self-connect booking front end. Rate-limited on probe.
+    - url: https://developer.transat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://developers.transat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://docs.transat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://developer.airtransat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://developers.airtransat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://agentdirect.transat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://agent.transat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://b2b.transat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://partners.transat.com
+      status: 0
+      note: DNS does not resolve.
+    - url: https://www.transat.com/en-CA/developers
+      status: 404
+    - url: https://www.transat.com/en-CA/api
+      status: 404
+    - url: https://www.transat.com/api/openapi.json
+      status: 404
+    - url: https://www.transat.com/api/swagger.json
+      status: 404
+    - url: https://www.transat.com/swagger/v1/swagger.json
+      status: 404
+    - url: https://www.transat.com/swagger/index.html
+      status: 404
+    - url: https://www.transat.com/apis.json
+      status: 404
+    - url: https://www.transat.com/llms.txt
+      status: 404
+    - url: https://www.transat.com/.well-known/apis.json
+      status: 404
+    - url: https://www.transat.com/.well-known/openapi
+      status: 404
+    - url: https://www.transat.com/.well-known/ai-plugin.json
+      status: 404
+    - url: https://www.transat.com/.well-known/security.txt
+      status: 404
+    - url: https://www.airtransat.com/.well-known/security.txt
+      status: 404
+    - url: https://www.airtransat.com/openapi.json
+      status: 404
+    - url: https://www.airtransat.com/swagger.json
+      status: 404
+    - url: https://www.airtransat.com/api-docs
+      status: 404
+    - url: https://www.airtransat.com/en-CA/api
+      status: 404
+    - url: https://www.airtransat.com/llms.txt
+      status: 404
+    - url: https://www.airtransat.com/apis.json
+      status: 404
+    - url: https://staticcontent.transat.com/airtransat/pdf/FR/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+      status: 404
+      note: No French edition of the specification is published.
+    - url: https://staticcontent.transat.com/airtransat/pdf/EN/
+      status: 403
+      note: Directory listing denied; no other specification PDFs could be enumerated.
+    - url: https://api.github.com/orgs/AirTransat
+      status: 200
+      note: >-
+        GitHub org "AirTransat" exists with 1 public repo — AirTransat/devtraining-needit-sandiego,
+        a fork of the ServiceNow developer-training sandbox. No API artifacts.
+    - url: https://api.github.com/orgs/transat
+      status: 404
+    - url: https://duffel.com/ndc/airlines-and-ndc
+      status: 200
+      note: Third-party NDC certification list. "Transat" does not appear.
+
+artifacts:
+  openapiHarvested: false
+  specsCount: 0
+  machineReadableSpecFound: false
+  humanReadableSpecFound: true
+  humanReadableSpec:
+    title: Radixx ConnectPoint API - Flight Booking Detailed View
+    version: 2.2.4
+    updated: 'May 2023'
+    format: PDF, 46 pages
+    sourceURL: https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+    fetchDate: '2026-07-28'
+    httpStatus: 200
+    bytes: 1004540
+    vendored: false
+    vendoringNote: >-
+      Not committed to this repo. It is a third-party (Radixx / Sabre) copyrighted document
+      that is neither OpenAPI, AsyncAPI, WSDL nor any other machine-parseable contract, so
+      it cannot satisfy the "every harvested spec must parse" rule and would sit in openapi/
+      misleadingly. It is linked with full provenance from apis.yml instead, and the openapi/
+      directory is intentionally absent.
+
+sources:
+  - url: https://www.airtransat.com/en-CA/air-transat-ndc
+    type: Documentation
+    note: NDC programme, connectivity options, aggregator table, EDIFACT surcharge statement, technical documentation link.
+  - url: https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+    type: APIReference
+    note: The only published technical contract. Operations, authentication, request/response examples.
+  - url: https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy
+    type: TermsOfService
+    note: Contractual lock-in prose — redistribution ban, single-CRS rule, ADMs, BSP Link, ARC MCO restriction.
+  - url: https://www.airtransat.com/en-CA/legal-notice/terms-of-use-of-the-air-transat-sites
+    type: TermsOfService
+    note: Anti-scraping, personal non-commercial licence, unilateral termination.
+  - url: https://www.airtransat.com/en-CA/legal-notice/privacy-policy
+    type: PrivacyPolicy
+    note: Data portability limited to EEA residents, on request, possible administrative fee.
+  - url: https://www.transatagentdirect.com/
+    type: Portal
+    note: Travel professional portal; agency code + password; manual registration with phone verification.
+  - url: https://www.transat.com/en-CA/corporate/about-transat
+    type: About
+    note: Corporate profile and milestones, TSX ticker TRZ.
+  - url: https://en.wikipedia.org/wiki/Transat_A.T.
+    type: Reference
+    note: Corporate history, brands, retail agency network scale.
+  - url: https://duffel.com/ndc/airlines-and-ndc
+    type: Reference
+    note: Third-party NDC certification list checked for an Air Transat entry; none found.
+
+actions:
+  apisYmlCreated: true
+  apisListed: 1
+  openapiDirectoryCreated: false
+  reason: >-
+    A real, public, unauthenticated API contract exists and is captured, so this is a
+    built profile rather than an identity-only stub. No machine-readable specification
+    exists to harvest, so no openapi/ directory was created and nothing was invented to
+    fill it.

@@ -1,0 +1,129 @@
+aid: transat
+url: https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/apis.yml
+name: Transat
+kind: company
+description: >-
+  Transat A.T. Inc. (TSX: TRZ) is a Montreal-headquartered, vertically integrated
+  Canadian leisure travel group. It operates Air Transat (IATA carrier code TS), a
+  transatlantic and sun-destination leisure airline, alongside tour-operating brands
+  (Transat / Transat Tours Canada Inc.) and one of Canada's largest retail travel
+  agency networks (Transat Travel, Voyages Transat, Marlin Travel, Club Voyages).
+  It sits on the supply side of the distribution chain: it owns the seat and package
+  inventory, sells it direct through transat.com and airtransat.com, through its own
+  retail agencies, through GDS/CRS EDIFACT channels governed by IATA Resolution 850m
+  and BSP settlement, and — since its published NDC programme — through an Accelya
+  Farelogix NDC gateway and a named set of NDC aggregators. Its API posture is
+  partner-gated but not opaque: Air Transat publishes a public NDC connectivity page
+  and a publicly downloadable 46-page "Air Transat API specifications" document, but
+  that document is a proprietary Radixx ConnectPoint SOAP contract (v2.2.4, May 2023),
+  not an IATA NDC schema. There is no self-serve developer portal, no machine-readable
+  OpenAPI or WSDL, no published base URL, no sandbox, no bulk export operation, and no
+  IATA NDC certification level is claimed. Credentials (a Transat-assigned IATA number,
+  agency login and password) are issued only under a commercial agreement, and the site
+  terms plus the CRS Booking and Ticketing Procedures Policy expressly prohibit scraping
+  and prohibit redistributing Air Transat content to any third-party agent, GDS or
+  metasearch engine without prior written consent.
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/groq.png
+tags:
+- Travel
+- Canada
+- Aviation
+- Airline
+- Distribution
+- NDC
+- Booking
+- Tour Operator
+- Corporate Travel
+- GDS
+created: '2026-07-28'
+modified: '2026-07-28'
+specificationVersion: '0.19'
+apis:
+- aid: transat:air-transat-ndc-direct-connect-api
+  name: Air Transat NDC Direct Connect API (Radixx ConnectPoint)
+  description: >-
+    The direct-connect flight shopping, booking, payment and servicing API that Air
+    Transat publishes to OTA and technology partners under its NDC programme. The only
+    technical contract Transat publishes for it is the "Air Transat API specifications"
+    PDF — the Radixx ConnectPoint API, Flight Booking Detailed View, version 2.2.4,
+    updated May 2023 — a SOAP 1.1 / .NET WCF service using Radixx.ConnectPoint data
+    contract namespaces and the tempuri.org service namespace. The document names the
+    following operations across the shopping, offer, order, payment and notification
+    stages: RetrieveFastFareSearch and RetrieveFareQuote / RetrieveFareQuoteShop
+    (shopping and pricing, sourced either from the Radixx local system or the Sabre
+    shopping cache), RetrieveSecurityToken (session and authorization), LoginTravelAgent
+    and RetrieveAgencyCommission (agency identity and commissioning), SummaryPNR,
+    CreatePNR (CommitSummary) and CreatePNR (SaveReservation) and RetrievePNR (order
+    creation and retrieval, including codeshare, interline and AMCI examples),
+    ConvertCurrencies and ProcessPNRPayment (payment), and Notification. Authentication
+    is a LogonID / Password exchange that returns a SecurityGUID, scoped to
+    AccessibleCarrierCode "TS". No base URL, WSDL, sandbox or OpenAPI is published;
+    Transat assigns each partner a pre-configured travel agency, IATA number and
+    credentials under a commercial agreement.
+  humanURL: https://www.airtransat.com/en-CA/air-transat-ndc
+  tags:
+  - NDC
+  - Distribution
+  - Shopping
+  - Booking
+  - Order Management
+  - Payment
+  - Ticketing
+  - SOAP
+  properties:
+  - type: Documentation
+    url: https://www.airtransat.com/en-CA/air-transat-ndc
+  - type: APIReference
+    url: https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+    name: Air Transat API specifications - Radixx ConnectPoint API v2.2.4 (PDF, 46 pages)
+  - type: Documentation
+    url: https://www.airtransat.com/fr-CA/air-transat-ndc
+    name: Air Transat NDC (French)
+  - type: Documentation
+    url: https://w3.accelya.com/
+    name: Accelya Farelogix - Air Transat's named NDC technology partner
+  - type: TermsOfService
+    url: https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy
+    name: CRS Booking and Ticketing Procedures Policy
+  - type: Support
+    url: mailto:commercial.ndc@transat.com
+    name: NDC connectivity contact
+common:
+- type: Website
+  url: https://www.transat.com/
+- type: Website
+  url: https://www.airtransat.com/
+  name: Air Transat
+- type: Documentation
+  url: https://www.airtransat.com/en-CA/air-transat-ndc
+  name: Air Transat NDC connectivity page
+- type: Portal
+  url: https://www.transatagentdirect.com/
+  name: Transat Agent Direct - travel professional portal (login required)
+- type: TermsOfService
+  url: https://www.airtransat.com/en-CA/legal-notice/terms-of-use-of-the-air-transat-sites
+- type: TermsOfService
+  url: https://www.transat.com/en-CA/website-terms-and-conditions
+- type: PrivacyPolicy
+  url: https://www.airtransat.com/en-CA/legal-notice/privacy-policy
+- type: Legal
+  url: https://www.airtransat.com/en-CA/legal-notice
+- type: Legal
+  url: https://www.airtransat.com/en-CA/legal-notice/conditions-of-carriage-and-tariffs
+  name: Conditions of carriage and tariffs
+- type: Blog
+  url: https://experience.transat.com/
+  name: Experience Transat
+- type: LinkedIn
+  url: https://www.linkedin.com/company/air-transat
+- type: GitHubOrganization
+  url: https://github.com/AirTransat
+- type: InvestorRelations
+  url: https://www.transat.com/en-CA/corporate/investors
+- type: About
+  url: https://www.transat.com/en-CA/corporate/about-transat
+- type: Review
+  url: review.yml
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
