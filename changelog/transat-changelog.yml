@@ -1,0 +1,64 @@
+generated: '2026-07-28'
+method: searched
+source: >-
+  Version History table, page 2 of
+  https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+  (HTTP 200, 1,004,540 bytes, 46 pages, fetched 2026-07-28).
+description: >-
+  Air Transat publishes no changelog page, release-notes feed or dated updates
+  channel for its API. The only version history that exists in public is the
+  four-row table printed on page 2 of the specification PDF, transcribed here
+  verbatim. It is the entire published change record for the direct-connect
+  API, covering 2020 to 2023.
+
+scheme: document-version
+current: 2.2.4
+current_source: 'cover page: "Version 2.2.4 - Updated: May 2023"'
+latest_in_history: 2.2.5
+feed: null
+page: null
+cadence: irregular
+window: 2020-09-08 to May 2023
+
+discrepancy:
+  observed: >-
+    The cover page states version 2.2.4 (May 2023), but the Version History
+    table lists 2.2.3 (2023-MAY) and then 2.2.5 with no date, and never lists
+    2.2.4 at all.
+  impact: >-
+    A partner cannot determine from the published document which revision they
+    are actually reading, when 2.2.5 shipped, or whether any of the changes
+    were breaking. There is no version-support or migration statement anywhere.
+
+entries:
+- version: '2.2.5'
+  date: null
+  author: AIDA
+  description: Made corrections.
+  breaking: not stated
+  additions: not stated
+  note: No date is given for this row, and this version does not appear on the cover page.
+- version: '2.2.3'
+  date: '2023-05'
+  author: AIDA
+  description: Revised, added external/internal shopping/booking documentation
+  breaking: not stated
+  additions: >-
+    Documentation of the internal (Radixx local system) versus external (Sabre
+    shopping cache) shopping and booking flows, including the IsExternalPriced
+    flag and the FareID-versus-TripID branch that changes which identifier a
+    client must carry into SummaryPNR.
+- version: '2.1'
+  date: '2021-12-13'
+  author: Radixx team
+  description: Revised version to share with new direct connect partners.
+  breaking: not stated
+- version: '1.0 & 2.0'
+  date: '2020-09-08'
+  author: Radixx team
+  description: Original version + revisions for 1st direct connect partner.
+  breaking: not applicable
+
+related:
+  lifecycle: lifecycle/transat-lifecycle.yml
+  conventions: conventions/transat-conventions.yml

@@ -1,0 +1,141 @@
+generated: '2026-07-28'
+method: searched
+source: >-
+  https://www.airtransat.com/en-CA/air-transat-ndc,
+  https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy,
+  https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+  (all HTTP 200, probed 2026-07-28), plus a negative check of
+  https://duffel.com/ndc/airlines-and-ndc.
+description: >-
+  Which industry and cross-cutting standards Air Transat's published API
+  surface actually conforms to. The headline finding is the gap between the
+  marketing frame (IATA NDC) and the shipped contract (a proprietary Radixx
+  ConnectPoint SOAP API). Standards Air Transat genuinely operates under are
+  the settlement and agency-conduct layer — IATA Resolution 850m, BSP Link,
+  Standard Traffic Document 649 — not the message-schema layer.
+
+standards:
+- id: iata-ndc
+  name: IATA New Distribution Capability
+  conforms: unverified
+  evidence: >-
+    Asserted, not evidenced. The public NDC connectivity page describes NDC as
+    "an initiative by IATA ... Based on XML language standards" and names
+    Accelya Farelogix as the technology partner, but no NDC schema version
+    (17.2 / 18.1 / 19.2 / 21.3) and no IATA NDC certification level is claimed
+    anywhere on the site. Air Transat does not appear on Duffel's published
+    list of NDC-certified airlines (checked 2026-07-28; string "Transat" not
+    present). The only downloadable contract is not an NDC message set.
+  certification_level: null
+  docs: https://www.airtransat.com/en-CA/air-transat-ndc
+
+- id: radixx-connectpoint
+  name: Radixx ConnectPoint API v2.2.4 (Sabre-owned PSS)
+  conforms: true
+  evidence: >-
+    The published 46-page "Air Transat API specifications" document is the
+    Radixx ConnectPoint API, Flight Booking Detailed View, v2.2.4 (May 2023),
+    using Radixx.ConnectPoint.* data-contract namespaces. This is a vendor
+    contract, not an open standard — conformance here means the integration is
+    portable to other Radixx carriers, not to other NDC carriers.
+
+- id: soap-1.1
+  name: SOAP 1.1
+  conforms: true
+  evidence: envelope namespace http://schemas.xmlsoap.org/soap/envelope/ throughout the specification
+
+- id: wsdl
+  name: WSDL service description
+  conforms: false
+  evidence: No WSDL location appears anywhere in the specification; clients must be hand-built from the PDF.
+
+- id: openapi
+  name: OpenAPI
+  conforms: false
+  evidence: No OpenAPI/Swagger document exists on any Transat or Air Transat host (probed 2026-07-28).
+
+- id: oauth2
+  name: OAuth 2.0
+  conforms: false
+  evidence: >-
+    Authentication is a Radixx LogonID/Password exchange returning a
+    SecurityGUID, plus an agency UserName/Password logon. No authorization
+    server, no token endpoint, no scopes. See authentication/transat-authentication.yml.
+
+- id: openid-connect
+  name: OpenID Connect
+  conforms: false
+  evidence: No /.well-known/openid-configuration on any published host.
+
+- id: rfc9457-problem-details
+  name: RFC 9457 Problem Details
+  conforms: false
+  evidence: SOAP faults with Radixx.ConnectPoint.Exceptions data contracts; no application/problem+json.
+
+- id: rfc8594-sunset-header
+  name: RFC 8594 Sunset header
+  conforms: false
+  evidence: No deprecation or sunset policy or header support is published. See lifecycle/transat-lifecycle.yml.
+
+- id: rfc9116-security-txt
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence: See well-known/transat-well-known.yml for the probed result per host.
+
+- id: iata-resolution-850m
+  name: IATA Resolution 850m (Agency Debit Memos)
+  conforms: true
+  evidence: >-
+    Explicitly invoked in the CRS Booking and Ticketing Procedures Policy as
+    the legal basis for ADMs issued against travel agents.
+  docs: https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy
+
+- id: iata-std-649
+  name: IATA Standard Traffic Document 649
+  conforms: true
+  evidence: '"Audits and checks are performed on TS 649 documents." (CRS Booking and Ticketing Procedures Policy)'
+
+- id: iata-bsp-link
+  name: IATA BSP Link settlement
+  conforms: true
+  evidence: >-
+    Refund requests must be "submitted in BSP Link to Air Transat within 12
+    months of the issuing date."
+
+- id: iata-carrier-designator
+  name: IATA two-letter airline designator
+  conforms: true
+  evidence: AccessibleCarrierCode "TS" is mandatory on every documented operation.
+
+- id: iata-airport-codes
+  name: IATA three-letter location identifiers
+  conforms: true
+  evidence: Worked examples in the specification use YUL and CDG.
+
+- id: iso-4217
+  name: ISO 4217 currency codes
+  conforms: true
+  evidence: CurrencyCode fields (e.g. CAD) and a ConvertCurrencies operation.
+
+- id: gdpr
+  name: EU GDPR 2016/679
+  conforms: partial
+  evidence: >-
+    The privacy policy grants erasure, restriction, objection and portability
+    rights only to residents of an EEA member state, in accordance with
+    Regulation 2016/679, and notes "A small fee may be charged ... to cover the
+    administrative costs of processing such requests."
+  docs: https://www.airtransat.com/en-CA/legal-notice/privacy-policy
+
+compliance_program:
+  published: false
+  certifications: []
+  note: >-
+    No SOC 2, ISO 27001, PCI DSS, HIPAA or FedRAMP attestation and no trust
+    centre is published by Transat A.T. Inc. or Air Transat. No `Compliance`
+    pointer is emitted, because no compliance programme is published.
+
+related:
+  authentication: authentication/transat-authentication.yml
+  conventions: conventions/transat-conventions.yml
+  lifecycle: lifecycle/transat-lifecycle.yml

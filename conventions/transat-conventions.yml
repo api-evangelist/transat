@@ -1,0 +1,139 @@
+generated: '2026-07-28'
+method: derived
+source: >-
+  Derived from the only published Air Transat technical contract —
+  https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+  (Radixx ConnectPoint API, Flight Booking Detailed View, v2.2.4, May 2023) —
+  and from review.yml, whose probes were run 2026-07-28. Everything not
+  published is recorded as "not published" rather than inferred.
+description: >-
+  Cross-cutting request/response semantics of Air Transat's direct-connect
+  distribution API. This is a SOAP 1.1 / .NET WCF service, not a REST API, so
+  several conventions the artifact normally captures (cursor pagination,
+  field expansion, RFC 9457 problem details, rate-limit headers) have no
+  equivalent and are recorded as not applicable or not published.
+
+api_style: SOAP 1.1 over HTTP, .NET WCF, XML request/response
+base_url: not published
+soap:
+  envelope_namespace: http://schemas.xmlsoap.org/soap/envelope/
+  service_namespace: http://tempuri.org/
+  data_contract_namespaces:
+  - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Request
+  - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Pricing.Request.FastFareSearch
+  - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Pricing.Request.Enums
+  - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Pricing.Response
+  - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Reservation.Request
+  - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Fulfillment.Request
+  - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Notification.Request
+  - http://schemas.datacontract.org/2004/07/Radixx.ConnectPoint.Exceptions
+  wsdl_published: false
+  note: >-
+    The tempuri.org service namespace is the .NET default, left unchanged. No
+    WSDL is published, so clients must be hand-built from the PDF.
+
+authentication:
+  scheme: Two-stage vendor credential exchange (RetrieveSecurityToken -> LoginTravelAgent)
+  session_token: SecurityGUID
+  detail: authentication/transat-authentication.yml
+
+idempotency:
+  supported: not published
+  mechanism: none documented
+  note: >-
+    No idempotency key, request-replay or safe-retry contract appears in the
+    published specification. Duplicate-booking control is handled
+    contractually, not technically: the CRS Booking and Ticketing Procedures
+    Policy prohibits active or passive duplicate bookings and enforces it with
+    Agency Debit Memos under IATA Resolution 850m. An ExternalBookingID field
+    exists on the reservation contract, but the specification does not
+    describe it as a de-duplication or replay key, so no idempotency claim is
+    made here.
+  policy_url: https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy
+
+pagination:
+  style: not applicable
+  note: >-
+    The documented operations are transactional (shop, price, book, pay,
+    retrieve one PNR). No list-and-page primitive and no pagination parameters
+    are published.
+
+field_expansion:
+  supported: not applicable
+  note: SOAP data contracts are fully materialized; there is no expand/sparse-field mechanism.
+
+metadata:
+  supported: partial
+  mechanism: ExternalBookingID on the reservation contract
+  note: >-
+    A partner-supplied external booking identifier is the only partner-controlled
+    correlation field named in the specification. There is no general key-value
+    metadata surface.
+
+request_tracing:
+  request_id_header: not published
+  note: No correlation-id or request-id header is documented.
+
+versioning:
+  scheme: document version on the published specification
+  current: 2.2.4
+  updated: '2023-05'
+  mechanism: not published
+  note: >-
+    Versioning is expressed only as the version of the Radixx ConnectPoint
+    specification document. No URI path version, version header, version
+    negotiation or version-support window is published.
+  detail: lifecycle/transat-lifecycle.yml
+
+error_envelope:
+  media_type: text/xml (SOAP fault)
+  rfc9457: false
+  shape: SOAP fault plus Radixx.ConnectPoint.Exceptions data contract types
+  note: >-
+    The specification declares a Radixx.ConnectPoint.Exceptions data-contract
+    namespace but publishes no enumerated error/exception code registry, so no
+    error catalog can be derived without fabrication. errors/ is intentionally
+    absent for this provider.
+
+rate_limits:
+  published: false
+  signal: not published
+  note: >-
+    No rate limit, quota, throttling header or 429-equivalent behaviour is
+    published for the partner API. (The public connectair.airtransat.com
+    consumer front end did return 429 under probe, but that is a website, not
+    the partner API.)
+
+pricing_source_routing:
+  mechanism: IsExternalPriced flag + Origin and Destination table
+  controlled_by: Air Transat
+  note: >-
+    Shopping is routed either to the Radixx local system (internal) or the
+    Sabre shopping cache (external). The specification states: "Shopping
+    Externally or Internally is setup by Transat in an Origin and Destination
+    table. Partners do not have the ability to choose the flight pricing
+    source." The routing changes which identifier the client must carry
+    forward — FareID for internally priced itineraries, TripID passed as
+    FareInformationID for externally priced ones. This is the single most
+    consequential convention in the contract and it is not client-controllable.
+
+session_semantics:
+  note: >-
+    After SavePNR closes the booking flow the session is terminated;
+    RetrieveSecurityToken must be re-issued before any servicing call such as
+    RetrievePNR. Clients cannot hold one long-lived session across shop, book
+    and service.
+
+data_conventions:
+  carrier_code: AccessibleCarrierCode, mandatory on every operation, fixed value "TS"
+  airport_codes: IATA 3-letter (worked examples YUL, CDG)
+  currency: ISO 4217 (CurrencyCode, e.g. CAD); ConvertCurrencies operation published
+  agency_identity: IATA agency number (IATANumber / IataNumberOfRequestor / IATANum)
+  order_identity: PNR ConfirmationNumber (record locator)
+  traveller_identity: KnownTravelerNumber, RedressNumber (US government identifiers)
+  settlement: IATA Standard Traffic Document 649 numbers, BSP Link references
+
+related:
+  authentication: authentication/transat-authentication.yml
+  conformance: conformance/transat-conformance.yml
+  lifecycle: lifecycle/transat-lifecycle.yml

@@ -1,0 +1,167 @@
+generated: '2026-07-28'
+method: derived
+source: >-
+  Derived from the request/response field tables and worked SOAP examples in
+  https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+  (Radixx ConnectPoint API v2.2.4, May 2023). No machine-readable schema exists;
+  every entity and field below appears verbatim in the published document.
+description: >-
+  The entity graph of Air Transat's direct-connect distribution API, recovered
+  from a PDF rather than a schema. Because there is no WSDL or XSD, this is a
+  best-effort reconstruction of the documented surface only — the specification
+  documents one flow (flight booking, detailed view), so entities outside that
+  flow (loyalty, ancillaries, content and imagery) are absent from the contract
+  and therefore absent here.
+
+model: partial
+model_note: >-
+  Cardinalities and nullability are stated only where the specification's
+  "M" (mandatory) column or a repeated element makes them explicit. Fields
+  marked "not stated" in the source are not guessed at.
+
+entities:
+- name: Session
+  description: The authorization context for a whole booking flow.
+  key: SecurityGUID
+  fields: [SecurityGUID, AccessibleCarrierCode, ClientIPAddress, HistoricUserName]
+  created_by: RetrieveSecurityToken
+  note: Closed after CreatePNR (SaveReservation); must be re-established for servicing calls.
+
+- name: Agency
+  description: The Transat-configured travel agency a partner books under.
+  key: IATANumber
+  fields: [IATANumber, IataNumberOfRequestor, IATANum, UserName, Password]
+  created_by: LoginTravelAgent (authenticated), RetrieveAgencyCommission (commission read)
+  note: Pre-defined and provisioned by Transat, not created by the partner.
+
+- name: ShoppingRequest
+  description: A fare/availability search.
+  fields: [Origin, Destination, DepartureDate, ArrivalDate, TotalSeatsRequired, PassengerTypeID, PTCID, WBCID, UseInventory, CurrencyCode]
+  operations: [RetrieveFastFareSearch, RetrieveFareQuote, RetrieveFareQuoteShop]
+
+- name: Fare
+  description: A priced itinerary option returned by shopping.
+  key: FareID
+  alternate_key: TripID
+  fields: [FareID, TripID, IsExternalPriced, FareInformationID, LFID, PFID, ServiceType]
+  note: >-
+    Internally priced itineraries carry FareID; externally priced (Sabre
+    shopping cache) itineraries carry TripID, which must be passed as
+    FareInformationID on the segment in SummaryPNR. Which one applies is set by
+    Transat in an Origin and Destination table and is not partner-selectable.
+
+- name: Flight
+  description: A marketed/operated flight leg.
+  fields: [FlightNum, FltNum, LFID, LegID, LegDetID, LegDetail, FltLegDet, NonStopLogicalFlightId, OriginLoc, ArrLoc, DepDate, ArrDate, FlightTime, FltDuration, AircraftType, AircraftDesc, AircraftDescription, MarketingCarrier, OperatingCarrier, SellingCarrier, International, DeiDisclosure]
+  note: >-
+    Codeshare, interline and AMCI cases are documented, with marketing versus
+    operating carrier and a disclosure element.
+
+- name: Segment
+  description: A flight leg attached to a reservation.
+  fields: [Segment, Segments, FareInformationID, LFID, PFID, DepartureDate, Origin, Destination]
+  note: The carrier of the FareID/TripID branch described under Fare.
+
+- name: Reservation
+  description: The PNR — the order object of this API.
+  key: ConfirmationNumber
+  composite_key: [SeriesNumber, ConfirmationNumber]
+  fields: [SeriesNumber, ConfirmationNumber, ReservationInfo, ReservationBalance, ExternalBookingID, BookingActionType, BookingSourceType]
+  operations: [SummaryPNR, CreatePNR (CommitSummary), CreatePNR (SaveReservation), RetrievePNR]
+
+- name: Person
+  description: A traveller on the reservation.
+  key: PersonOrgID
+  fields: [PersonOrgID, Title, FirstName, LastName, Gender, DOB, Age, PassengerTypeID, IsPrimaryPassenger, TravelsWithPersonOrgID, RelationType, NationalityLaguageID, MarketingOptIn, KnownTravelerNumber, RedressNumber, FrequentFlyerNumber, ProfileId]
+  note: >-
+    KnownTravelerNumber and RedressNumber are the US Secure Flight identifiers
+    and are optional, "Provided by the customer", default blank.
+    "NationalityLaguageID" is spelled that way in the source.
+
+- name: ContactInfo
+  description: Contact points attached to a person on the reservation.
+  key: ContactID
+  fields: [ContactID, PersonOrgId, ContactField, ContactType, Extension, CountryCode, AreaCode, PhoneNumber, Display, PreferredContactMethod, Address, Company, Comments]
+  note: ContactType is documented as MobilePhone or Email.
+
+- name: Payment
+  description: A payment applied to a reservation.
+  fields: [BaseAmount, BaseCurrency, PaymentAmount, PaymentMethod, PaymentMethodType, CardHolder, CardNumber, CVCode, ExpirationDate, CurrencyPaid, DatePaid, ExchangeRate, ExchangeRateDate, OriginalCurrency, IataNumber, IsTACreditCard, TerminalID, ProcessorID, MerchantID, ProcessorName, TransactionID, ResponseCode, Reference, VoucherNumber, CheckNumber, ValueCode, GcxID, GcxOptOption, AncillaryData01, AncillaryData02, AncillaryData03, AncillaryData04, AncillaryData05]
+  operations: [ProcessPNRPayment]
+  psp: >-
+    On CreatePNR (SaveReservation) the specification states that "If
+    successful, a call is made to the Ingenico PSP for payment settlement
+    (SET_PAYMENT)." TransactionID is documented as "Transaction ID returned
+    from PSP".
+  note: >-
+    Card data (CardNumber, CVCode, ExpirationDate) is passed in the SOAP body.
+    The specification publishes no decline-code registry, so no
+    errors/transat-decline-codes.yml is emitted.
+
+- name: CurrencyConversion
+  description: Currency conversion applied to pricing or payment.
+  fields: [CurrencyCode, ExchangeRate, ExchangeRateDate, OriginalCurrency, CurrencyConversions, CurrencyConversion]
+  operations: [ConvertCurrencies]
+
+- name: Notification
+  description: An outbound confirmation email or SMS Radixx sends to the traveller on request.
+  fields: [ActionType, LanguageCode, ReceiptRequest, EmailAddresses, BookingChangeNoticeRequest, OverrideEmailAddresses, OverrideSmsNumbers, SmsNumbers, BookingActionType, BookingSourceType, VoucherRequest, ProfileRequest, ProfileID]
+  operations: [Notification (SendNotification)]
+  note: >-
+    This is a partner-initiated request, NOT a webhook or callback to the
+    partner. The specification states "The Notification call is optional. The
+    OTA Partner may choose to send its own confirmation email to its
+    customers." There is no event, callback or subscription surface anywhere in
+    the contract, which is why no asyncapi/ artifact and no Webhooks pointer
+    is emitted.
+
+relationships:
+- {from: Session, to: Agency, type: has_one, via: SecurityGUID + IATANumber, note: LoginTravelAgent binds an authenticated session to one agency}
+- {from: ShoppingRequest, to: Fare, type: has_many, via: FareID / TripID}
+- {from: Fare, to: Flight, type: has_many, via: LFID}
+- {from: Reservation, to: Segment, type: has_many, via: Segments}
+- {from: Segment, to: Fare, type: belongs_to, via: FareInformationID}
+- {from: Segment, to: Flight, type: belongs_to, via: LFID}
+- {from: Reservation, to: Person, type: has_many, via: PersonOrgID}
+- {from: Person, to: ContactInfo, type: has_many, via: PersonOrgId}
+- {from: Person, to: Person, type: has_one, via: TravelsWithPersonOrgID, note: infant/companion association}
+- {from: Reservation, to: Payment, type: has_many, via: PNRPayments}
+- {from: Payment, to: CurrencyConversion, type: has_one, via: ExchangeRate + ExchangeRateDate}
+- {from: Notification, to: Reservation, type: belongs_to, via: SeriesNumber + ConfirmationNumber}
+- {from: Agency, to: Reservation, type: has_many, via: IataNumber on payment and booking}
+
+identifiers:
+  portable:
+  - {id: AccessibleCarrierCode, standard: IATA airline designator, example: TS}
+  - {id: Origin/Destination, standard: IATA location identifier, example: YUL, CDG}
+  - {id: IATANumber, standard: IATA agency number}
+  - {id: ConfirmationNumber, standard: PNR record locator, example: E6TPIG}
+  - {id: CurrencyCode, standard: ISO 4217, example: CAD}
+  - {id: KnownTravelerNumber, standard: US TSA Secure Flight}
+  - {id: RedressNumber, standard: US DHS TRIP}
+  non_portable:
+  - {id: SecurityGUID, vendor: Radixx}
+  - {id: FareID, vendor: Radixx}
+  - {id: TripID, vendor: Radixx/Sabre shopping cache}
+  - {id: LFID, vendor: Radixx logical flight id}
+  - {id: PFID, vendor: Radixx}
+  - {id: LegID / LegDetID, vendor: Radixx}
+  - {id: PersonOrgID, vendor: Radixx}
+  - {id: SeriesNumber, vendor: Radixx}
+  - {id: WBCID / PTCID / PassengerTypeID, vendor: Radixx}
+  - {id: GcxID, vendor: Radixx}
+
+not_documented:
+- Loyalty / frequent flyer programme objects (FFNumber is a bare field, no entity)
+- Ancillaries, seats, baggage as first-class objects
+- Content and imagery
+- Schedules and operational status
+- Refunds and exchanges
+- Any bulk export, list or reporting object
+
+render: null
+render_note: No subway/ visual exists for this provider.
+
+related:
+  conventions: conventions/transat-conventions.yml
+  authentication: authentication/transat-authentication.yml

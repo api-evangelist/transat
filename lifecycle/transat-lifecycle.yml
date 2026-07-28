@@ -1,0 +1,78 @@
+generated: '2026-07-28'
+method: searched
+source: >-
+  https://www.airtransat.com/en-CA/air-transat-ndc and
+  https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+  (both HTTP 200, probed 2026-07-28 — see review.yml). Absences below were
+  verified, not assumed.
+description: >-
+  Lifecycle posture of Air Transat's direct-connect distribution API. The only
+  lifecycle signal Air Transat publishes is the version stamp on the
+  specification document itself. There is no versioning policy, no deprecation
+  or sunset policy, no SLA and no status page for the partner API.
+
+versioning:
+  scheme: document-version
+  current: 2.2.4
+  updated: '2023-05'
+  product: Radixx ConnectPoint API (Sabre-owned PSS), Flight Booking Detailed View
+  docs: https://www.airtransat.com/en-CA/air-transat-ndc
+  policy_url: null
+  note: >-
+    No URI-path version, version header, version negotiation, supported-version
+    window or upgrade path is published. A partner learns of a version change
+    only when a new PDF is posted.
+
+deprecation:
+  policy_url: null
+  sunset_header: false
+  deprecation_header: false
+  notice_period: not published
+  note: >-
+    No deprecation policy, sunset schedule or RFC 8594 header support is
+    published for the API. The only published termination language is
+    commercial and unilateral: the site terms reserve Air Transat's right to
+    "terminate the Terms of Use and/or your right to use these Sites, at any
+    time, without cause and without prior notice".
+  channel_deprecation:
+    subject: GDS/CRS EDIFACT
+    status: >-
+      Not deprecated, but actively repriced against. The NDC connectivity page
+      states verbatim "Cost optimisation: no surcharge on bookings made via
+      NDC, unlike the surcharge applied to EDIFACT bookings" and "Financial
+      incentives for bookings made through NDC channels." The surcharge is
+      asserted but not quantified.
+
+sla:
+  url: null
+  uptime_target: not published
+  support_hours: not published
+  note: No service-level agreement, uptime commitment or support-response target is published.
+
+status_page: null
+status_page_note: >-
+  No status.* or statuspage host is published for Transat, Air Transat or the
+  partner API. Operational disruption is communicated through the consumer
+  travel-advisory pages, not a machine-readable status feed.
+
+support:
+  ndc_contact: mailto:commercial.ndc@transat.com
+  agency_portal: https://www.transatagentdirect.com/
+  agency_registration_phone: '+1-514-987-1717 ext. 7505'
+  revenue_contact: mailto:airtransat-revenus@transat.com
+
+deprecated_operations: []
+deprecated_operations_note: >-
+  No machine-readable specification exists, so no deprecated operations can be
+  derived. The published specification marks none.
+
+changelog:
+  published: false
+  note: >-
+    No dated changelog, release-notes page or revision feed exists for the API.
+    The single dated data point is the specification's own "updated May 2023".
+
+related:
+  conventions: conventions/transat-conventions.yml
+  authentication: authentication/transat-authentication.yml
+  conformance: conformance/transat-conformance.yml

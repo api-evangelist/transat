@@ -1,0 +1,71 @@
+generated: '2026-07-28'
+method: searched
+source: Live registry and repository searches, 2026-07-28
+description: >-
+  Transat A.T. Inc. / Air Transat publishes no client libraries, SDKs or CLI
+  for its direct-connect distribution API. The published contract is a SOAP 1.1
+  / .NET WCF service with no WSDL, so partners cannot even generate a client;
+  every integration is hand-built from the 46-page PDF. This file records the
+  registry sweep so the absence is auditable.
+
+packages: []
+
+registries_searched:
+- registry: npm
+  query: airtransat
+  results: 0
+- registry: npm
+  query: transat
+  results: 0
+- registry: npm
+  query: radixx
+  results: 1
+  note: >-
+    The single hit ("radixx") is an unrelated third-party JavaScript state
+    management library, not a Radixx ConnectPoint client.
+- registry: pypi
+  query: transat
+  results: 0
+  note: https://pypi.org/pypi/transat/json returned 404
+- registry: pypi
+  query: airtransat
+  results: 0
+  note: https://pypi.org/pypi/airtransat/json returned 404
+- registry: github
+  query: air transat api
+  results: 0
+
+github_organization:
+  url: https://github.com/AirTransat
+  type: Organization
+  name: Air Transat
+  created: '2022-06-02'
+  public_repos: 1
+  repositories:
+  - name: devtraining-needit-sandiego
+    url: https://github.com/AirTransat/devtraining-needit-sandiego
+    description: >-
+      A fork of the ServiceNow developer-site training content repository
+      ("San Diego" release). Internal training material, not an API client.
+  verdict: >-
+    The organization exists and is genuinely Air Transat's, but it contains no
+    SDK, no client, no specification and no sample code. Its one public repo is
+    a ServiceNow training fork.
+
+sdks:
+  official: 0
+  community: 0
+  note: >-
+    No official or community SDK exists in any registry probed. No `SDKs`
+    pointer is emitted in apis.yml, because emitting one would claim a client
+    library that does not exist.
+
+cli:
+  published: false
+
+generation_feasibility:
+  from_wsdl: false
+  note: >-
+    A SOAP consumer would ordinarily be generated from a WSDL. No WSDL location
+    is published anywhere in the specification, so even code generation is
+    unavailable to partners. See conventions/transat-conventions.yml.

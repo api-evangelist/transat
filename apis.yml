@@ -23,7 +23,7 @@ description: >-
   terms plus the CRS Booking and Ticketing Procedures Policy expressly prohibit scraping
   and prohibit redistributing Air Transat content to any third-party agent, GDS or
   metasearch engine without prior written consent.
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/groq.png
+image: https://airtransatcommedia.blob.core.windows.net/tswcm/media/tsca/skin/img/logos/logo-airtransat-header-destop-2023.svg
 tags:
 - Travel
 - Canada
@@ -37,6 +37,18 @@ tags:
 - GDS
 created: '2026-07-28'
 modified: '2026-07-28'
+enrichment:
+  round: '2026-07-28'
+  method: search-generate-derive
+  notes: >-
+    Contract discovery re-run against every Transat, Air Transat, api.transat.com
+    and apis.airtransat.com host. No OpenAPI, Swagger, WSDL, GraphQL, AsyncAPI,
+    MCP server, /.well-known/ document or /llms.txt exists. The published
+    46-page Radixx ConnectPoint specification PDF was fetched and parsed, and
+    the artifacts below are grounded in it. No sandbox, status page, trust
+    centre, vulnerability-disclosure programme, SDK, CLI, Postman collection,
+    webhook surface or idempotency contract exists, so those artifacts and
+    their pointers are deliberately absent rather than fabricated.
 specificationVersion: '0.19'
 apis:
 - aid: transat:air-transat-ndc-direct-connect-api
@@ -88,7 +100,39 @@ apis:
   - type: Support
     url: mailto:commercial.ndc@transat.com
     name: NDC connectivity contact
+  - type: Authentication
+    url: authentication/transat-authentication.yml
+    name: Two-stage Radixx credential exchange (RetrieveSecurityToken then LoginTravelAgent)
+  - type: Conventions
+    url: conventions/transat-conventions.yml
+    name: SOAP request/response semantics, session model and pricing-source routing
+  - type: DataModel
+    url: data-model/transat-data-model.yml
+    name: Entity graph recovered from the specification PDF
+  - type: Conformance
+    url: conformance/transat-conformance.yml
+    name: Standards conformance, including the IATA NDC assertion gap
 common:
+- type: DomainSecurity
+  url: security/transat-domain-security.yml
+- type: Authentication
+  url: authentication/transat-authentication.yml
+- type: Conventions
+  url: conventions/transat-conventions.yml
+- type: Conformance
+  url: conformance/transat-conformance.yml
+- type: Lifecycle
+  url: lifecycle/transat-lifecycle.yml
+- type: ChangeLog
+  url: changelog/transat-changelog.yml
+  name: Version history transcribed from the specification PDF (2020-2023)
+- type: DataModel
+  url: data-model/transat-data-model.yml
+- type: Packages
+  url: packages/transat-packages.yml
+  name: Registry sweep - no SDK, client library or CLI is published
+- type: LLMsTxt
+  url: llms/transat-llms.txt
 - type: Website
   url: https://www.transat.com/
 - type: Website
@@ -97,9 +141,16 @@ common:
 - type: Documentation
   url: https://www.airtransat.com/en-CA/air-transat-ndc
   name: Air Transat NDC connectivity page
-- type: Portal
+- type: Partners
   url: https://www.transatagentdirect.com/
-  name: Transat Agent Direct - travel professional portal (login required)
+  name: >-
+    Transat Agent Direct - travel professional booking portal (login required;
+    manual agency registration with telephone verification). Retyped from
+    Portal in the 2026-07-28 enrichment round: this is a partner booking
+    portal, not a developer portal. Transat publishes no developer portal.
+- type: Support
+  url: https://www.airtransat.com/en-CA/contact-us
+  name: Air Transat contact us
 - type: TermsOfService
   url: https://www.airtransat.com/en-CA/legal-notice/terms-of-use-of-the-air-transat-sites
 - type: TermsOfService

@@ -1,0 +1,57 @@
+# Transat
+
+> Transat A.T. Inc. (TSX: TRZ) is a Montreal-headquartered, vertically integrated Canadian leisure travel group: Air Transat (IATA carrier code TS), tour-operating brands, and one of Canada's largest retail travel agency networks. It sits on the supply side of the travel distribution chain — it owns the seat and package inventory and sells it direct, through its own agencies, through GDS/CRS EDIFACT channels, and through a published NDC programme. Its API is partner-gated: there is no self-serve developer portal, no OpenAPI, no WSDL, no published base URL and no sandbox, but Air Transat does publish, unauthenticated, a 46-page "Air Transat API specifications" PDF describing the direct-connect contract.
+
+## Important context for agents
+
+- The only technical contract Air Transat publishes is a **proprietary Radixx ConnectPoint SOAP 1.1 / .NET WCF API (v2.2.4, May 2023)**, not an IATA NDC message set. The NDC framing is marketing; the shipped contract is a vendor PSS API.
+- **No machine-readable specification exists.** There is no OpenAPI, Swagger, WSDL, AsyncAPI, GraphQL schema or MCP server for Transat. Do not attempt to call this API from a discovery document; there is none, and no base URL is published.
+- **Access is gated by a commercial agreement.** Credentials (a Radixx LogonID/Password, a Transat-assigned IATA number, and an agency UserName/Password) are issued only after a partner agreement. There is no signup page, no key issuance page, no trial and no sandbox.
+- **Scraping is contractually prohibited.** The Air Transat site terms prohibit "software, applications, computer programs, automated scripts, macros, spiders or other 'screen scraping' software, robots, 'bot' or any other technical means" used to copy, extract, aggregate, store, distribute or manipulate site content. The CRS Booking and Ticketing Procedures Policy separately prohibits redistributing Air Transat content to any third-party agent, GDS or metasearch engine without prior written consent.
+- Undocumented internal JSON hosts (api.transat.com, apis.airtransat.com) exist but publish no contract and 404 or 403 unauthenticated. They are not part of the API surface and are not listed as APIs.
+
+## APIs
+
+- [Air Transat NDC Direct Connect API (Radixx ConnectPoint)](https://www.airtransat.com/en-CA/air-transat-ndc): Partner-gated direct-connect flight shopping, booking, payment and servicing. SOAP 1.1. Documented operations: RetrieveFastFareSearch, RetrieveFareQuote / RetrieveFareQuoteShop, RetrieveSecurityToken, LoginTravelAgent, RetrieveAgencyCommission, SummaryPNR, CreatePNR (CommitSummary), CreatePNR (SaveReservation), RetrievePNR, ConvertCurrencies, ProcessPNRPayment, Notification.
+
+## Specs
+
+- [Air Transat API specifications (PDF, 46 pages)](https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf): Radixx ConnectPoint API, Flight Booking Detailed View, v2.2.4, updated May 2023. The only downloadable technical contract. SOAP 1.1 / .NET WCF, tempuri.org service namespace, Radixx.ConnectPoint.* data contracts.
+
+## Docs
+
+- [Air Transat NDC connectivity (EN)](https://www.airtransat.com/en-CA/air-transat-ndc): The public NDC programme page — direct integration, aggregator and portal routes.
+- [Air Transat NDC connectivity (FR)](https://www.airtransat.com/fr-CA/air-transat-ndc)
+- [Transat Agent Direct](https://www.transatagentdirect.com/): Travel-professional portal. Login required; unregistered agencies must telephone for verification and submit a manual registration form.
+- [Accelya Farelogix](https://w3.accelya.com/): Air Transat's named NDC technology partner.
+
+## Aggregator routes to the same content
+
+- [Travelfusion](https://corporate.travelfusion.com/products-services/tf-new-distribution-capability): live
+- [Clarity TTS](https://www.claritytts.com/en): live
+- [Farenexus](https://www.farenexus.com/): live
+- [Onefly](https://www.onefly.fr/): live
+- [Mystifly](https://mystifly.com/): "available soon"
+- [Duffel](https://duffel.com/): "available soon"
+
+## Legal and policy
+
+- [CRS Booking and Ticketing Procedures Policy](https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy): Redistribution ban, single-CRS rule, no passive segments, no inventory holding, Agency Debit Memos under IATA Resolution 850m, BSP Link refunds within 12 months.
+- [Terms of use of the Air Transat sites](https://www.airtransat.com/en-CA/legal-notice/terms-of-use-of-the-air-transat-sites): Personal, non-commercial licence; anti-scraping clause; unilateral termination.
+- [Transat website terms and conditions](https://www.transat.com/en-CA/website-terms-and-conditions)
+- [Privacy policy](https://www.airtransat.com/en-CA/legal-notice/privacy-policy): Portability rights conditional on EEA residence; administrative fee may apply.
+- [Conditions of carriage and tariffs](https://www.airtransat.com/en-CA/legal-notice/conditions-of-carriage-and-tariffs)
+
+## API Evangelist artifacts
+
+- [apis.yml](https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/apis.yml): The APIs.json index for this provider.
+- [review.yml](https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/review.yml): Switching-cost review with every probed URL and its HTTP status.
+- [authentication/transat-authentication.yml](https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/authentication/transat-authentication.yml): The two-stage vendor credential exchange.
+- [conventions/transat-conventions.yml](https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/conventions/transat-conventions.yml): Cross-cutting SOAP request/response semantics, session model, pricing-source routing.
+- [conformance/transat-conformance.yml](https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/conformance/transat-conformance.yml): Standards conformance, including the NDC assertion gap.
+- [lifecycle/transat-lifecycle.yml](https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/lifecycle/transat-lifecycle.yml): Versioning, deprecation, SLA and status-page posture.
+
+## Contact
+
+- NDC connectivity: commercial.ndc@transat.com
+- Agency registration: +1-514-987-1717 ext. 7505

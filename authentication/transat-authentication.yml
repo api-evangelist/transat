@@ -1,0 +1,100 @@
+generated: '2026-07-28'
+method: searched
+source: >-
+  https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf
+  — "Air Transat API specifications", Radixx ConnectPoint API, Flight Booking
+  Detailed View, v2.2.4 (May 2023), the only technical contract Air Transat
+  publishes. Cross-checked against review.yml (probed 2026-07-28).
+docs: https://www.airtransat.com/en-CA/air-transat-ndc
+description: >-
+  Air Transat's direct-connect distribution API does not use OAuth, OpenID
+  Connect, API keys or mutual TLS. It uses a two-stage vendor credential
+  exchange inherited from the Radixx (Sabre) passenger service system: a
+  system-level logon that returns a session GUID, followed by a travel-agent
+  logon that binds that session to a Transat-assigned IATA agency. There is no
+  self-serve key issuance, no developer portal and no sandbox; every credential
+  is provisioned by Transat under a commercial agreement.
+
+summary:
+  types: [vendor-credential-exchange]
+  standards: []
+  oauth2: false
+  openid_connect: false
+  api_key: false
+  mutual_tls: not published
+  self_serve: false
+  spec_format: SOAP 1.1 / .NET WCF (no WSDL published)
+
+schemes:
+- name: RetrieveSecurityToken
+  type: vendor-credential-exchange
+  stage: 1
+  transport: SOAP 1.1
+  credentials:
+  - AccessibleCarrierCode  # fixed value "TS"
+  - LogonID                # Radixx system logon issued by Transat
+  - Password
+  returns: SecurityGUID
+  description: >-
+    System-level authentication. Exchanges a Transat-issued Radixx LogonID and
+    Password, scoped to AccessibleCarrierCode "TS", for a SecurityGUID that
+    scopes the remainder of the booking flow.
+- name: LoginTravelAgent
+  type: vendor-credential-exchange
+  stage: 2
+  transport: SOAP 1.1
+  credentials:
+  - SecurityGUID           # from RetrieveSecurityToken
+  - AccessibleCarrierCode
+  - IATANumber             # must be "Active in RADIXX"
+  - UserName               # agency user issued by Transat
+  - Password
+  description: >-
+    Agency-level authentication. Binds the session to a pre-defined travel
+    agency that Transat configures for each partner. The specification states:
+    "A pre-defined Travel Agency will be configured and provided to each OTA
+    Partner."
+
+session:
+  token: SecurityGUID
+  lifetime: not published
+  renewal: >-
+    The session is closed after SavePNR at the end of the main booking flow;
+    RetrieveSecurityToken must be called again for subsequent work such as
+    retrieving a PNR.
+  refresh_token: none
+  revocation: not published
+
+scopes:
+  model: none
+  note: >-
+    No scope, permission or consent surface is published. Authorization is
+    carrier-scoped (AccessibleCarrierCode "TS") and agency-scoped (IATANumber),
+    both assigned by Transat, not requested by the client.
+  artifact: null   # scopes/ intentionally absent — this is not an OAuth provider
+
+provisioning:
+  self_serve: false
+  gate: commercial-agreement
+  contact: commercial.ndc@transat.com
+  steps:
+  - Contact Air Transat commercial / NDC connectivity and enter a partner agreement.
+  - Transat configures a pre-defined travel agency in Radixx for the partner.
+  - Transat issues a Radixx LogonID + Password for RetrieveSecurityToken.
+  - Transat issues an IATA number that must be Active in RADIXX.
+  - Transat issues an agency UserName + Password for LoginTravelAgent.
+  sandbox: none published
+  trial: none published
+
+transport_security:
+  published_base_url: false
+  note: >-
+    No endpoint host, WSDL location or sandbox URL appears anywhere in the
+    46-page specification. The service address is supplied privately to each
+    partner, so transport security cannot be verified from public sources.
+    See security/transat-domain-security.yml for the public web hosts.
+
+related:
+  conventions: conventions/transat-conventions.yml
+  conformance: conformance/transat-conformance.yml
+  lifecycle: lifecycle/transat-lifecycle.yml

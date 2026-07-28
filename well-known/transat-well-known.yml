@@ -1,0 +1,88 @@
+generated: '2026-07-28'
+method: searched
+source: Live probes of the /.well-known/ discovery surface on every Transat host, 2026-07-28
+description: >-
+  Result of probing the RFC-registered /.well-known/ discovery surface plus
+  /llms.txt across every Transat, Air Transat and partner-portal host. Nothing
+  is published. Recorded so the absence is auditable rather than assumed — and
+  because one host returns a misleading soft-200.
+
+result: none-published
+security_txt: false
+openid_configuration: false
+oauth_authorization_server: false
+api_catalog: false
+ai_plugin: false
+llms_txt: false
+
+hosts:
+- host: https://www.transat.com
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /llms.txt, status: 404}
+- host: https://www.airtransat.com
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /llms.txt, status: 404}
+- host: https://api.transat.com
+  note: Undocumented internal JSON host referenced in airtransat.com page configuration.
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /llms.txt, status: 404}
+- host: https://apis.airtransat.com
+  note: Undocumented internal host referenced in page configuration as "umbrellaTS".
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /llms.txt, status: 404}
+- host: https://staticcontent.transat.com
+  note: CDN host that serves the published API specification PDF.
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /llms.txt, status: 404}
+- host: https://www.transatagentdirect.com
+  note: >-
+    Returns HTTP 200 for every path probed, including paths that do not exist.
+    The body is the AngularJS single-page-application shell titled
+    "GroupQuote", not a discovery document. Treat every 200 from this host as a
+    soft-404.
+  soft_404: true
+  documents:
+  - {path: /.well-known/security.txt, status: 200, valid: false, body: SPA shell (GroupQuote)}
+  - {path: /.well-known/openid-configuration, status: 200, valid: false, body: SPA shell (GroupQuote)}
+  - {path: /.well-known/oauth-authorization-server, status: 200, valid: false, body: SPA shell (GroupQuote)}
+  - {path: /.well-known/api-catalog, status: 200, valid: false, body: SPA shell (GroupQuote)}
+  - {path: /.well-known/ai-plugin.json, status: 200, valid: false, body: SPA shell (GroupQuote)}
+  - {path: /llms.txt, status: 200, valid: false, body: SPA shell (GroupQuote)}
+
+contract_discovery:
+  note: >-
+    The same probe sweep covered the machine-readable contract paths on every
+    API and website host. All missed, confirming there is no OpenAPI, Swagger,
+    GraphQL or AsyncAPI document to harvest.
+  probes:
+  - {host: api.transat.com, paths: [/openapi.json, /openapi.yaml, /v1/openapi.json, /api-docs, /docs, /redoc, /graphql, /asyncapi.yaml], status: 404}
+  - {host: api.transat.com, paths: [/swagger.json], status: 403}
+  - {host: apis.airtransat.com, paths: [/openapi.json, /openapi.yaml, /v1/openapi.json, /api-docs, /docs, /redoc, /graphql, /asyncapi.yaml], status: 404}
+  - {host: apis.airtransat.com, paths: [/swagger.json], status: 403}
+  - {host: www.airtransat.com, paths: [/openapi.json, /openapi.yaml, /swagger.json, /v1/openapi.json, /api-docs, /docs, /redoc, /graphql, /asyncapi.yaml], status: 404}
+  - {host: www.transat.com, paths: [/openapi.json, /openapi.yaml, /swagger.json, /v1/openapi.json, /api-docs, /docs, /redoc, /graphql, /asyncapi.yaml], status: 404}
