@@ -23,6 +23,17 @@ description: >-
   terms plus the CRS Booking and Ticketing Procedures Policy expressly prohibit scraping
   and prohibit redistributing Air Transat content to any third-party agent, GDS or
   metasearch engine without prior written consent.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://airtransatcommedia.blob.core.windows.net/tswcm/media/tsca/skin/img/logos/logo-airtransat-header-destop-2023.svg
 tags:
 - Travel
