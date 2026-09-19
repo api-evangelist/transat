@@ -52,6 +52,17 @@ tags:
 - Travel
 - Canada
 - Aviation
+- Airlines
+- Distribution
+- NDC
+- Booking
+- Tour Operator
+- Corporate Travel
+- GDS
+tags_raw:
+- Travel
+- Canada
+- Aviation
 - Airline
 - Distribution
 - NDC
@@ -98,6 +109,15 @@ apis:
     credentials under a commercial agreement.
   humanURL: https://www.airtransat.com/en-CA/air-transat-ndc
   tags:
+  - NDC
+  - Distribution
+  - Shopping
+  - Booking
+  - Order Management
+  - Payments
+  - Ticketing
+  - SOAP
+  tags_raw:
   - NDC
   - Distribution
   - Shopping
