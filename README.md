@@ -1,4 +1,4 @@
-# Transat (transat)
+# Transat
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -64,96 +64,90 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Transat A.T. Inc. (TSX: TRZ) is a Montreal-headquartered, vertically integrated Canadian leisure travel group. It operates Air Transat (IATA carrier code TS), a transatlantic and sun-destination leisure airline, alongside tour-operating brands (Transat / Transat Tours Canada Inc.) and one of Canada's largest retail travel agency networks (Transat Travel, Voyages Transat, Marlin Travel, Club Voyages). It sits on the supply side of the distribution chain: it owns the seat and package inventory, sells it direct through transat.com and airtransat.com, through its own retail agencies, through GDS/CRS EDIFACT channels governed by IATA Resolution 850m and BSP settlement, and — since its published NDC programme — through an Accelya Farelogix NDC gateway and a named set of NDC aggregators. Its API posture is partner-gated but not opaque: Air Transat publishes a public NDC connectivity page and a publicly downloadable 46-page "Air Transat API specifications" document, but that document is a proprietary Radixx ConnectPoint SOAP contract (v2.2.4, May 2023), not an IATA NDC schema. There is no self-serve developer portal, no machine-readable OpenAPI or WSDL, no published base URL, no sandbox, no bulk export operation, and no IATA NDC certification level is claimed.
+Transat A.T. Inc. (TSX: TRZ) is a Montreal-headquartered, vertically integrated Canadian leisure travel group. It operates Air Transat (IATA carrier code TS), a transatlantic and sun-destination leisure airline, alongside tour-operating brands (Transat / Transat Tours Canada Inc.) and one of Canada's largest retail travel agency networks (Transat Travel, Voyages Transat, Marlin Travel, Club Voyages). It sits on the supply side of the distribution chain: it owns the seat and package inventory, sells it direct through transat.com and airtransat.com, through its own retail agencies, through GDS/CRS EDIFACT channels governed by IATA Resolution 850m and BSP settlement, and — since its published NDC programme — through an Accelya Farelogix NDC gateway and a named set of NDC aggregators. Its API posture is partner-gated but not opaque: Air Transat publishes a public NDC connectivity page and a publicly downloadable 46-page "Air Transat API specifications" document, but that document is a proprietary Radixx ConnectPoint SOAP contract (v2.2.4, May 2023), not an IATA NDC schema. There is no self-serve developer portal, no machine-readable OpenAPI or WSDL, no published base URL, no sandbox, no bulk export operation, and no IATA NDC certification level is claimed. Credentials (a Transat-assigned IATA number, agency login and password) are issued only under a commercial agreement, and the site terms plus the CRS Booking and Ticketing Procedures Policy expressly prohibit scraping and prohibit redistributing Air Transat content to any third-party agent, GDS or metasearch engine without prior written consent.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/transat/refs/heads/main/apis.yml)
+**Areas:** Travel · Canada · Aviation · Airlines · Distribution · NDC · Booking · Tour Operator · Corporate Travel · GDS
 
-## Tags
+## Transat on APIs.io
 
-- Travel
-- Canada
-- Aviation
-- Airline
-- Distribution
-- NDC
-- Booking
-- Tour Operator
-- Corporate Travel
-- GDS
+Everything profiled for Transat is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/transat/](https://apis.io/providers/transat/)** — or go straight to one of the APIs or properties below.
 
-## Timestamps
+### APIs (1)
 
-- **Created:** 2026-07-28
-- **Modified:** 2026-07-28
+- [Air Transat NDC Direct Connect API (Radixx ConnectPoint)](https://apis.io/apis/transat/air-transat-ndc-direct-connect-api/) — The direct-connect flight shopping, booking, payment and servicing API that Air Transat publishes to OTA and technology partners under its NDC programme.…
 
-## APIs
+### Published properties
 
-### Air Transat NDC Direct Connect API (Radixx ConnectPoint)
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-The direct-connect flight shopping, booking, payment and servicing API that Air Transat publishes to OTA and technology partners under its NDC programme. The only technical contract Transat publishes for it is the "Air Transat API specifications" PDF — the Radixx ConnectPoint API, Flight Booking Detailed View, version 2.2.4, updated May 2023 — a SOAP 1.1 / .NET WCF service. Authentication is a LogonID / Password exchange returning a SecurityGUID, scoped to `AccessibleCarrierCode` `TS`. No base URL, WSDL, sandbox or OpenAPI is published.
+#### Security (2)
 
-- **Human URL:** [https://www.airtransat.com/en-CA/air-transat-ndc](https://www.airtransat.com/en-CA/air-transat-ndc)
-- **Base URL:** not published
+Authentication, trust centre, and vulnerability disclosure.
 
-#### Documented operations
+- [Transat Authentication](https://apis.io/security/transat/transat-authentication/)
+- [Transat Domain Security](https://apis.io/security/transat/transat-domain-security/)
 
-| Stage | Operations |
-| --- | --- |
-| Shopping | `RetrieveFastFareSearch`, `RetrieveFareQuoteShop` |
-| Offers and pricing | `RetrieveFareQuote`, `ConvertCurrencies` |
-| Session and identity | `RetrieveSecurityToken`, `LoginTravelAgent`, `RetrieveAgencyCommission` |
-| Booking and order | `SummaryPNR`, `CreatePNR` (CommitSummary), `CreatePNR` (SaveReservation), `RetrievePNR` |
-| Payment | `ProcessPNRPayment` |
-| Events | `Notification` |
+## Where to find this API
 
-#### Tags
-
-- NDC
-- Distribution
-- Shopping
-- Booking
-- Order Management
-- Payment
-- Ticketing
-- SOAP
-
-#### Properties
-
-- [Documentation](https://www.airtransat.com/en-CA/air-transat-ndc)
-- [API Reference](https://staticcontent.transat.com/airtransat/pdf/EN/NDC-TS-Radixx-ConnectPoint-API-book-Flight.pdf) — Air Transat API specifications, Radixx ConnectPoint API v2.2.4 (PDF, 46 pages)
-- [Documentation (French)](https://www.airtransat.com/fr-CA/air-transat-ndc)
-- [Documentation](https://w3.accelya.com/) — Accelya Farelogix, Air Transat's named NDC technology partner
-- [Terms of Service](https://www.airtransat.com/en-CA/legal-notice/crs-booking-and-ticketing-policy) — CRS Booking and Ticketing Procedures Policy
-
-## Switching cost
-
-The full evidence trail lives in [review.yml](review.yml). In short:
-
-- **Interface shape:** `standard-plus-proprietary`. IATA NDC is asserted on the connectivity page; the only downloadable contract is proprietary Radixx ConnectPoint SOAP.
-- **Second source:** `alternatives-with-migration`. The content is single-origin, but Transat publishes six aggregator routes to it — Travelfusion, Clarity TTS, Farenexus, Onefly, and (soon) Mystifly and Duffel — plus the Sprk and Transat Agent Direct portals and the legacy GDS.
-- **Exit path:** `export-on-request`. No bulk export operation; `RetrievePNR` is one record at a time. Consumer portability is EEA-only, on request, with a possible administrative fee.
-- **Identifier portability:** IATA carrier code TS, IATA airport codes, IATA agency numbers, PNR record locators, 649 traffic documents and BSP references travel; Radixx `SecurityGUID`, `FareID`, `TripID` and Transat-assigned agency credentials do not.
-- **Contractual lock-in:** the CRS policy bars sharing or redistributing Air Transat content to any third-party agent, GDS or metasearch engine without prior written consent, requires booking and ticketing within the same CRS, and enforces via Agency Debit Memos under IATA Resolution 850m.
-- **Access gate:** `commercial-agreement`. Contact `commercial.ndc@transat.com`; Transat configures a pre-defined travel agency and issues the IATA number and credentials.
-- **Distribution model:** `ndc-direct`, with the legacy EDIFACT/GDS channel explicitly surcharged relative to NDC.
-
-## Common
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
 - [Website](https://www.transat.com/)
-- [Air Transat](https://www.airtransat.com/)
-- [Air Transat NDC connectivity page](https://www.airtransat.com/en-CA/air-transat-ndc)
-- [Transat Agent Direct](https://www.transatagentdirect.com/) — travel professional portal (login required)
-- [Terms of Use of the Air Transat Sites](https://www.airtransat.com/en-CA/legal-notice/terms-of-use-of-the-air-transat-sites)
-- [Transat website terms and conditions](https://www.transat.com/en-CA/website-terms-and-conditions)
-- [Privacy Policy](https://www.airtransat.com/en-CA/legal-notice/privacy-policy)
-- [Legal notice](https://www.airtransat.com/en-CA/legal-notice)
-- [Conditions of carriage and tariffs](https://www.airtransat.com/en-CA/legal-notice/conditions-of-carriage-and-tariffs)
-- [Experience Transat blog](https://experience.transat.com/)
-- [LinkedIn](https://www.linkedin.com/company/air-transat)
-- [GitHub organization](https://github.com/AirTransat)
-- [Investors](https://www.transat.com/en-CA/corporate/investors)
-- [About Transat](https://www.transat.com/en-CA/corporate/about-transat)
+- [Documentation](https://www.airtransat.com/en-CA/air-transat-ndc)
+- [Support](https://www.airtransat.com/en-CA/contact-us)
+- [Blog](https://experience.transat.com/)
+- [Terms of service](https://www.airtransat.com/en-CA/legal-notice/terms-of-use-of-the-air-transat-sites)
+- [Privacy policy](https://www.airtransat.com/en-CA/legal-notice/privacy-policy)
+- [GitHub](https://github.com/AirTransat)
 
-## Maintainers
+## API Evangelist rating
 
-- Kin Lane — kin@apievangelist.com
+**Kin Score 23.8** — emerging · rubric 0.24.0 · scored 2026-10-17
+
+| Facet | Score |
+|---|---|
+| Discoverability | 64.3 |
+| Contract quality | 0.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 18.4 |
+| Developer ergonomics | 35.7 |
+| Access clarity | 21.1 |
+
+**Agent readiness 5.4** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | — |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | — |
+| OpenAPI Examples | — |
+| Rate Limit Signal | — |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | yes |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+
+**Regulatory alignment 24.5** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/transat/](https://apis.io/providers/transat/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Transat: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/transat/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
